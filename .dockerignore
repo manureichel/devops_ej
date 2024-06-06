@@ -1,0 +1,14 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info
+dist
+build
+.vscode
+.idea
+.git
+.gitignore
+Dockerfile
+.dockerignore
