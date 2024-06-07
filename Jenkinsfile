@@ -1,10 +1,16 @@
 pipeline {
+    agent any
+    
+    options {
+    timeout(time: 15, unit: 'MINUTES')
+    }
+
     environment {
         registry = "manureichel/devops_ej"
         registryCredential = 'dockerhub_id'
         dockerImage = ''
     }
-    agent any
+
     stages {
         stage('Building image') {
             steps {
