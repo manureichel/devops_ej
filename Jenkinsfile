@@ -6,12 +6,6 @@ pipeline {
     }
     agent any
     stages {
-        stage('Cloning from Github') {
-            steps {
-                git branch: 'main', 
-                    url: 'https://github.com/manureichel/devops_ej.git'
-            }
-        }
         stage('Building image') {
             steps {
                 script {
@@ -19,14 +13,7 @@ pipeline {
                 }
             }
         }
-        stage('Run Container') {
-            steps{
-                sh "docker rm -f devops_ej"
-                sh "docker run -d -p 3000:80 --name devops_ej $registry:$BUILD_NUMBER"
-                sh "docker ps -f name=devops_ej"
-                }
-            }
-        stage('Deploy image') {
+        stage('Push Image') {
             steps {
                 script {
                     docker.withRegistry('', registryCredential) {
@@ -35,10 +22,12 @@ pipeline {
                 }
             }
         }
-        stage('Cleaning up') {
-            steps {
-                sh "docker rmi ${registry}:${BUILD_NUMBER}"
+        stage('Deploy') {
+            steps{
+                sh "docker rm -f devops_ej"
+                sh "docker run -d -p 3000:80 --name devops_ej $registry:$BUILD_NUMBER"
+                sh "docker ps -f name=devops_ej"
+                }
             }
-        }
     }
 }
