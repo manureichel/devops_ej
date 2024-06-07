@@ -7,14 +7,14 @@ pipeline {
     }
     agent any
     stages {
-        stage('Building image with Buildah') {
+        stage('Build') {
             steps {
                 sh """
                     buildah bud -t ${dockerImage} .
                 """
             }
         }
-        stage('Push Image with Buildah') {
+        stage('Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId:registryCredential, passwordVariable:"dockerpass", usernameVariable:"dockeruser")]){
                     sh "buildah push --tls-verify=false --creds=${dockeruser}:${dockerpass} ${dockerImage} docker://docker.io/${dockerImage}"

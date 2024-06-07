@@ -2,18 +2,21 @@
 
 ## Resumen
 
-Este ejercicio tiene como objetivo desplegar una aplicación tipo REST API alojada en un repositorio de GitHub, utilizando Jenkins como herramienta CI/CD y Docker para la contenedorización y despliegue de la aplicación.
+Este ejercicio tiene como objetivo desplegar una aplicación tipo REST API alojada en un repositorio de GitHub, utilizando Jenkins como herramienta CI/CD, Buildah para la creación de la imagen del contenedor de la aplicación y Docker para despliegue de la aplicación.
 
 ### Sobre la aplicación
 Como se requiere una REST API y además se solicita que cuente con Swagger para verificar su funcionamiento se optó por escribir una pequeña aplicación en Python utilizando FastAPI. La misma cuenta con endpoints de ejemplo para los métodos típicos utilizados en un CRUD.
 
 ### Jenkins
 
-Se corre de manera local el servicio de Jenkins en un contenedor. A partir del siguiente Dockerfile se crea una imagen de Jenkins que cuente con Docker ya configurado.
+Se corre de manera local el servicio de Jenkins en un contenedor. A partir del siguiente Dockerfile se crea una imagen de Jenkins que cuente con Docker y Buildah.
 
 ```dockerfile
 FROM jenkins/jenkins:lts
+
 USER root
+
+# Instalación de Docker
 RUN apt-get update && \
     apt-get -y install apt-transport-https \
     ca-certificates \
@@ -29,14 +32,40 @@ RUN apt-get update && \
     apt-get -y install docker-ce
 RUN apt-get install -y docker-ce
 RUN usermod -a -G docker jenkins
+
+# Instalación de Buildah
+RUN apt-get update && \
+    apt-get -y install bats btrfs-progs git go-md2man golang libapparmor-dev libglib2.0-dev libgpgme11-dev libseccomp-dev libselinux1-dev make skopeo slirp4netns fuse-overlayfs && \
+    apt-get clean
+
+RUN apt-get update && \
+    apt-get -y install buildah && \
+    apt-get -y install podman
+
+RUN mkdir -p /etc/containers && \
+    chown -R jenkins:jenkins /etc/containers
+
+COPY policy.json /etc/containers/
+
+RUN touch /etc/subgid /etc/subuid && \
+    chmod g=u /etc/subgid /etc/subuid /etc/passwd && \
+    echo jenkins:10000:65536 > /etc/subuid && \
+    echo jenkins:10000:65536 > /etc/subgid
+
 USER jenkins
+
+EXPOSE 8080
+
+ENTRYPOINT ["/usr/bin/env", "bash", "/usr/local/bin/jenkins.sh"]
 ```
 
 Creamos la imagen con `docker build -t <nombre_imagen> .` y luego creamos y desplegamos un contenedor a partir de nuestra imagen Jenkins con 
 
-`docker run --group-add 0 --name jenkins-docker-pruebas -p 20000:8080 -p 50000:50000 -v //var/run/docker.sock:/var/run/docker.sock <nombre_imagen>`
+`docker run --privileged --group-add 0 --name jenkins-2  -p 8080:8080 -p 50000:50000 -p 3050:80 -v //var/run/docker.sock:/var/run/docker.sock <nombre_imagen>`
 
 Vease que se utiliza un socket entre Windows y el contenedor mediante `-v //var/run/docker.sock:/var/run/docker.sock`.
+
+Esto nos permite a la hora de desplegar con Docker desde Jenkins que se utilice el Daemon de Docker instalado localmente.
 
 ## Configuraciones en Jenkins
 
@@ -48,9 +77,9 @@ Las etapas del pipeline se resumen en la siguiente imagen
 ![alt text](imgs/image.png)
 
 - Checkout SCM: Descarga el código desde el repositorio de Github.
-- Building image: Mediante docker se realiza el build de la imagen.
-- Push Image: Se pushea la imagen al repositorio de imágenes Dockerhub.
-- Deploy: Mediante docker se crea un contenedor y despliega la aplicación.
+- Build: Mediante buildah se realiza el build de la imagen a partir del código descargado.
+- Push: Se pushea la imagen con Buildah al repositorio de imágenes Dockerhub.
+- Deploy: Mediante Docker se crea un contenedor y despliega la aplicación.
 
 ### Ngrok
 
