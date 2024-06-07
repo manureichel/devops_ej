@@ -19,6 +19,13 @@ pipeline {
                 }
             }
         }
+        stage('Run Container') {
+            steps{
+                sh "docker rm -f devops_ej"
+                sh "docker run -d -p 3000:80 --name devops_ej $registry:$BUILD_NUMBER"
+                sh "docker ps -f name=devops_ej"
+                }
+            }
         stage('Deploy image') {
             steps {
                 script {
