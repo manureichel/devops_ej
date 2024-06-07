@@ -4,7 +4,7 @@ app = FastAPI(title="API REST", description="Aplicación de ejemplo para examen 
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Hello World!"}
 
 @app.post("/items/")
 async def create_item():
