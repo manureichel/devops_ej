@@ -2,7 +2,7 @@
 
 ## Resumen
 
-Este ejercicio tiene como obejtivo desplegar una aplicación tipo REST API alojada en un repositorio de GitHub, utilizando Jenkins como herramienta CI/CD y Docker para la contenedorización y despliegue de la aplicación.
+Este ejercicio tiene como objetivo desplegar una aplicación tipo REST API alojada en un repositorio de GitHub, utilizando Jenkins como herramienta CI/CD y Docker para la contenedorización y despliegue de la aplicación.
 
 ### Sobre la aplicación
 Como se requiere una REST API y además se solicita que cuente con Swagger para verificar su funcionamiento se optó por escribir una pequeña aplicación en Python utilizando FastAPI. La misma cuenta con endpoints de ejemplo para los métodos típicos utilizados en un CRUD.
@@ -32,7 +32,7 @@ RUN usermod -a -G docker jenkins
 USER jenkins
 ```
 
-Creamos la imagen con `docker build -t <nombre_imagen> .` y luego desplegamos nuestra imagen de Jenkins con 
+Creamos la imagen con `docker build -t <nombre_imagen> .` y luego creamos y desplegamos un contenedor a partir de nuestra imagen Jenkins con 
 
 `docker run --group-add 0 --name jenkins-docker-pruebas -p 20000:8080 -p 50000:50000 -v //var/run/docker.sock:/var/run/docker.sock <nombre_imagen>`
 

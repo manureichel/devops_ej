@@ -1,37 +1,30 @@
 pipeline {
-    agent any
-    
-    options {
-    timeout(time: 15, unit: 'MINUTES')
-    }
-
     environment {
         registry = "manureichel/devops_ej"
         registryCredential = 'dockerhub_id'
-        dockerImage = ''
+        dockerImage = "${registry}:${BUILD_NUMBER}"
+        containerName = "my_app_container"
     }
-
+    agent any
     stages {
-        stage('Building image') {
+        stage('Building image with Buildah') {
             steps {
-                script {
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER"
-                }
+                sh """
+                    buildah bud -t ${dockerImage} .
+                """
             }
         }
-        stage('Push Image') {
+        stage('Push Image with Buildah') {
             steps {
-                script {
-                    docker.withRegistry('', registryCredential) {
-                        dockerImage.push()
-                    }
+                withCredentials([usernamePassword(credentialsId:registryCredential, passwordVariable:"dockerpass", usernameVariable:"dockeruser")]){
+                    sh "buildah push --tls-verify=false --creds=${dockeruser}:${dockerpass} ${dockerImage} docker://docker.io/${dockerImage}"
                 }
             }
         }
         stage('Deploy') {
             steps{
                 sh "docker rm -f devops_ej"
-                sh "docker run -d -p 3000:80 --name devops_ej $registry:$BUILD_NUMBER"
+                sh "docker run -d -p 3000:80 --name devops_ej ${dockerImage}"
                 sh "docker ps -f name=devops_ej"
                 }
             }
