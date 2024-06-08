@@ -81,9 +81,13 @@ Las etapas del pipeline se resumen en la siguiente imagen:
 - Push: Se pushea la imagen con Buildah al repositorio de imágenes Dockerhub.
 - Deploy: Mediante Docker se crea un contenedor y despliega la aplicación.
 
+### Notificaciones
+
+Se configuran notificaciones de Discord. A partir de un canal de discord, se utiliza un Webhook del mismo para enviar notificaciones sobre los estados de los stage. Se utiliza de manera declarativa en el archivo Jenkinsfile. 
+
 ### Ngrok
 
-Se utiliza Ngrok como tunel para dar acceso al Webhook de Github a Jenkins de manera de disparar el build ante un nuevo commit. Para el puerto utilizado en el contenedor de Jenkins se utiliza el siguiente comando `ngrok http 20000 --host-header="localhost:20000"`. Esto devuelve una URL similar a `https://6937-201-253-216-253.ngrok-free.app`, y es la que se utiliza en la configuración de Webhook de Github.
+Se utiliza Ngrok como tunel para dar acceso al Webhook de Github a Jenkins de manera de disparar el build ante un nuevo commit. Para el puerto utilizado en el contenedor de Jenkins se utiliza el siguiente comando `ngrok http 8080 --host-header="localhost:8080"`. Esto devuelve una URL similar a `https://6937-201-253-216-253.ngrok-free.app`, y es la que se utiliza en la configuración de Webhook de Github.
 
 #### Referencias
 https://tomgregory.com/aws/running-docker-in-docker-on-windows/
