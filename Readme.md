@@ -73,7 +73,7 @@ Esto nos permite a la hora de desplegar con Docker desde Jenkins que se utilice 
 
 Se genera un nuevo Pipeline que utiliza como archivo Jenkinsfile al del presente repositorio, a su vez se realizan las configuraciones para que un nuevo commit a la rama main genere un nuevo build en Jenkins (Build Trigger).
 
-Las etapas del pipeline se resumen en la siguiente imagen
+Las etapas del pipeline se resumen en la siguiente imagen:
 ![alt text](imgs/image.png)
 
 - Checkout SCM: Descarga el código desde el repositorio de Github.

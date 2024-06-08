@@ -4,6 +4,7 @@ pipeline {
         registryCredential = 'dockerhub_id'
         dockerImage = "${registry}:${BUILD_NUMBER}"
         containerName = "my_app_container"
+        discord_webhook = credentials('discord_webhook')
     }
     agent any
     stages {
@@ -13,11 +14,27 @@ pipeline {
                     buildah bud -t ${dockerImage} .
                 """
             }
+            post {
+                success {
+                    sendDiscordNotification("finalizó correctamente")
+                }
+                failure {
+                    sendDiscordNotification("finalizó con errores")
+                }
+            }
         }
         stage('Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId:registryCredential, passwordVariable:"dockerpass", usernameVariable:"dockeruser")]){
                     sh "buildah push --tls-verify=false --creds=${dockeruser}:${dockerpass} ${dockerImage} docker://docker.io/${dockerImage}"
+                }
+            }
+            post {
+                success {
+                    sendDiscordNotification("finalizó correctamente")
+                }
+                failure {
+                    sendDiscordNotification("finalizó con errores")
                 }
             }
         }
@@ -28,5 +45,20 @@ pipeline {
                 sh "docker ps -f name=devops_ej"
                 }
             }
+            post {
+                success {
+                    sendDiscordNotification("finalizó correctamente")
+                }
+                failure {
+                    sendDiscordNotification("finalizó con errores")
+                }
+            }
     }
+}
+
+def sendDiscordNotification(msg) {
+    discordSend description: "El stage ${STAGE_NAME} ${msg}", 
+                result: currentBuild.currentResult, 
+                title: JOB_NAME, 
+                webhookURL: env.DISCORD_WEBHOOK
 }
