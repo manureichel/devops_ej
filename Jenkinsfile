@@ -10,9 +10,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh """
-                    buildah bud -t ${dockerImage} .
-                """
+                sh "buildah bud -t ${dockerImage} ."
             }
             post {
                 success {
