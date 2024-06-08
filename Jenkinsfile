@@ -44,7 +44,6 @@ pipeline {
                 sh "docker run -d -p 3000:80 --name devops_ej ${dockerImage}"
                 sh "docker ps -f name=devops_ej"
                 }
-            }
             post {
                 success {
                     sendDiscordNotification("finalizó correctamente")
@@ -53,6 +52,7 @@ pipeline {
                     sendDiscordNotification("finalizó con errores")
                 }
             }
+        }
     }
 }
 
