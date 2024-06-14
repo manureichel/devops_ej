@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Optional, Dict
 
 app = FastAPI(
-    title="API REST App",
+    title="API REST App! :D",
     description="Aplicación de ejemplo para examen Devops de Banco Galicia. Manuel Reichel.",
     version="1.0.0"
 )
